@@ -1,26 +1,33 @@
 import {
-  Injectable,
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
+  Injectable,
 } from '@nestjs/common';
 
 import { Reflector } from '@nestjs/core';
 
+import { ROLES_KEY } from '../decorators/roles.decorator';
+
 @Injectable()
 export class RolesGuard
-  implements CanActivate {
-
+  implements CanActivate
+{
   constructor(
     private reflector: Reflector,
   ) {}
 
-  canActivate(context: ExecutionContext) {
+  canActivate(
+    context: ExecutionContext,
+  ): boolean {
 
     const roles =
-      this.reflector.get(
-        'roles',
+      this.reflector.getAllAndOverride<
+        string[]
+      >(ROLES_KEY, [
         context.getHandler(),
-      );
+        context.getClass(),
+      ]);
 
     if (!roles) {
       return true;
@@ -29,8 +36,20 @@ export class RolesGuard
     const request =
       context.switchToHttp().getRequest();
 
-    return roles.includes(
-      request.user.role,
-    );
+    const user = request.user;
+
+    if (!user) {
+      throw new ForbiddenException(
+        'User not authenticated',
+      );
+    }
+
+    if (!roles.includes(user.role)) {
+      throw new ForbiddenException(
+        'Access denied',
+      );
+    }
+
+    return true;
   }
 }

@@ -4,7 +4,6 @@ import {
 } from 'class-validator';
 
 export class CreateTaskDto {
-
   @IsNotEmpty()
   title: string;
 

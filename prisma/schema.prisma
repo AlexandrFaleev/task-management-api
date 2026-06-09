@@ -13,6 +13,8 @@ model User {
   password  String
   role      Role     @default(USER)
   createdAt DateTime @default(now())
+
+  tasks Task[]
 }
 
 model Task {
@@ -22,6 +24,7 @@ model Task {
   completed   Boolean  @default(false)
   createdAt   DateTime @default(now())
   userId      Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

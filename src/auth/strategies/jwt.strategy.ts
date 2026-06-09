@@ -16,12 +16,17 @@ export class JwtStrategy extends PassportStrategy(
       jwtFromRequest:
         ExtractJwt.fromAuthHeaderAsBearerToken(),
 
-      secretOrKey:
-        process.env.JWT_SECRET,
+      ignoreExpiration: false,
+
+      secretOrKey: process.env.JWT_SECRET,
     });
   }
 
   async validate(payload: any) {
-    return payload;
+    return {
+      id: payload.id,
+      email: payload.email,
+      role: payload.role,
+    };
   }
 }
